@@ -6,7 +6,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 
 public class ExecutorServiceTest {
@@ -72,6 +75,31 @@ public class ExecutorServiceTest {
         long totalTime = System.currentTimeMillis() - start;
 
         System.out.println(Thread.currentThread().getName() + ": total time = " + totalTime + " ms");
+    }
+
+    @Test
+    public void shutdownTest() throws Exception {
+
+        ExecutorService executor = Executors.newCachedThreadPool();
+
+        System.out.println(Thread.currentThread().getName() + ": submitting tasks");
+
+        Future<Integer> result1 = executor.submit(getCallable(3, 2000l));
+        Future<Integer> result2 = executor.submit(getCallable(5, 5000l));
+
+        executor.shutdown();
+
+        try {
+            executor.submit(getCallable(6, 1000l));
+            fail("Executor has'nt been shut down");
+        } catch (RejectedExecutionException ex) {
+            System.out.println(Thread.currentThread().getName() + ": Execution rejected");
+        }
+
+        assertTrue("Executor hasn't been shut down", executor.isShutdown());
+
+        assertEquals("Wrong result", Integer.valueOf(3), result1.get());
+        assertEquals("Wrong result", Integer.valueOf(5), result2.get());
     }
 
     private Callable<Integer> getCallable(final Integer result, final long timeout) {
