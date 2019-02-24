@@ -12,6 +12,25 @@ import static org.junit.Assert.assertEquals;
 public class ExecutorServiceTest {
 
     @Test
+    public void newSingleThreadExecutorFromRunnable() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        long start = System.currentTimeMillis();
+
+        System.out.println(Thread.currentThread().getName() + ": submitting task");
+
+        Future<?> result1 = executor.submit(getRunnable(20l));
+
+        while (!result1.isDone()) {
+            System.out.println(Thread.currentThread().getName() + ": waiting for thread termination");
+        }
+
+        long totalTime = System.currentTimeMillis() - start;
+
+        System.out.println(Thread.currentThread().getName() + ": total time = " + totalTime + " ms");
+    }
+
+    @Test
     public void newSingleThreadExecutorTest() throws Exception {
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -68,6 +87,22 @@ public class ExecutorServiceTest {
                 }
 
                 return result;
+            }
+        };
+    }
+
+
+    private Runnable getRunnable(final long timeout) {
+
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println(Thread.currentThread().getName() + ": sleeping " + timeout + " ms");
+                    Thread.sleep(timeout);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
             }
         };
     }
