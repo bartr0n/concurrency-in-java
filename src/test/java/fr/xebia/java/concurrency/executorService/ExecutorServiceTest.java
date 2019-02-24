@@ -1,5 +1,6 @@
 package fr.xebia.java.concurrency.executorService;
 
+import fr.xebia.java.concurrency.CustomThreadFactory;
 import org.junit.Test;
 
 import java.util.concurrent.Callable;
@@ -59,6 +60,28 @@ public class ExecutorServiceTest {
     public void newCachedThreadPoolTest() throws Exception {
 
         ExecutorService executor = Executors.newCachedThreadPool();
+
+        long start = System.currentTimeMillis();
+
+        System.out.println(Thread.currentThread().getName() + ": submitting tasks");
+
+        Future<Integer> result1 = executor.submit(getCallable(3, 2000l));
+        Future<Integer> result2 = executor.submit(getCallable(5, 5000l));
+
+        System.out.println(Thread.currentThread().getName() + ": asserting");
+
+        assertEquals("Wrong result", Integer.valueOf(3), result1.get());
+        assertEquals("Wrong result", Integer.valueOf(5), result2.get());
+
+        long totalTime = System.currentTimeMillis() - start;
+
+        System.out.println(Thread.currentThread().getName() + ": total time = " + totalTime + " ms");
+    }
+
+    @Test
+    public void newCachedThreadPoolTestWithCustomThreadFactory() throws Exception {
+
+        ExecutorService executor = Executors.newCachedThreadPool(new CustomThreadFactory());
 
         long start = System.currentTimeMillis();
 
